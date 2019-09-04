@@ -10,21 +10,19 @@ import (
 )
 
 type Scanner struct {
-	debug  bool
 	c      *Config
 	git    *Git
 	failed bool
 }
 
-func NewScanner(c *Config, debug bool) (*Scanner, error) {
+func NewScanner(c *Config) (*Scanner, error) {
 	git, err := NewGit(c.Endpoint, c.Token)
 	if err != nil {
 		return nil, err
 	}
 	return &Scanner{
-		debug: debug,
-		c:     c,
-		git:   git,
+		c:   c,
+		git: git,
 	}, nil
 }
 
@@ -76,7 +74,7 @@ func (s *Scanner) fetchGroups() ([]*gitlab.Group, error) {
 		}
 		groups = append(groups, grs...)
 	}
-	if s.debug {
+	if s.c.Debug {
 		log.Println(strings.Join(groupNames, ", "))
 		log.Printf("Found %d group(s)", len(groups))
 	}
@@ -97,7 +95,7 @@ func (s *Scanner) fetchProjects() ([]*gitlab.Project, error) {
 		}
 		projects = append(projects, prs...)
 	}
-	if s.debug {
+	if s.c.Debug {
 		log.Println(strings.Join(projectNames, ", "))
 		log.Printf("Found %d project(s)", len(projects))
 	}
@@ -111,7 +109,7 @@ func (s *Scanner) checkProjectsVariables(projects []*gitlab.Project) error {
 		if err != nil {
 			return err
 		}
-		if s.debug {
+		if s.c.Debug {
 			log.Printf("Found %d variable(s)", len(vars))
 		}
 		isContains := s.IsVariablesContainsSensitiveData(vars)
@@ -129,7 +127,7 @@ func (s *Scanner) checkGroupsVariables(groups []*gitlab.Group) error {
 		if err != nil {
 			return err
 		}
-		if s.debug {
+		if s.c.Debug {
 			log.Printf("Found %d variable(s)", len(vars))
 		}
 		isContains := s.IsVariablesContainsSensitiveData(vars)

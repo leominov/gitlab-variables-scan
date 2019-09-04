@@ -10,6 +10,7 @@ import (
 )
 
 type Config struct {
+	Debug     bool             `yaml:"debug"`
 	Endpoint  string           `yaml:"endpoint"`
 	Token     string           `yaml:"token"`
 	GroupIDs  []int            `yaml:"groupIDs"`

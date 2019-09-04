@@ -17,7 +17,10 @@ func realMain() error {
 	if err != nil {
 		return err
 	}
-	scanner, err := NewScanner(config, *debug)
+	if *debug {
+		config.Debug = true
+	}
+	scanner, err := NewScanner(config)
 	if err != nil {
 		return err
 	}
