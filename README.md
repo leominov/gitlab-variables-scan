@@ -12,7 +12,10 @@ groupIDs:
   - 1
   - 2
 keys:
-  - PASSWORD
+  - KEY$
+  - TOKEN$
+  - SECRET$
+  - PASSWORD$
 values:
   - BEGIN PRIVATE KEY
 pairs:
