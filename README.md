@@ -12,12 +12,14 @@ groupIDs:
   - 1
   - 2
 keys:
+  # Common-used variable names
   - KEY$
   - TOKEN$
   - SECRET$
   - PASSWORD$
 values:
   - BEGIN PRIVATE KEY
+  - ^s\.(.*){24}$
 pairs:
   - LOGIN=guest
 ```
