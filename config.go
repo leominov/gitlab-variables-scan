@@ -16,11 +16,11 @@ type Config struct {
 	Token     string           `yaml:"token"`
 	GroupIDs  []int            `yaml:"groupIDs"`
 	KeysRaw   []string         `yaml:"keys"`
-	KeysRE    []*regexp.Regexp `yaml:"-"`
+	Keys      []*regexp.Regexp `yaml:"-"`
 	ValuesRaw []string         `yaml:"values"`
-	ValuesRE  []*regexp.Regexp `yaml:"-"`
+	Values    []*regexp.Regexp `yaml:"-"`
 	PairsRaw  []string         `yaml:"pairs"`
-	PairsRE   []*regexp.Regexp `yaml:"-"`
+	Pairs     []*regexp.Regexp `yaml:"-"`
 }
 
 func LoadFromFile(filename string) (*Config, error) {

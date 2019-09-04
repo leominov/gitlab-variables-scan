@@ -154,17 +154,17 @@ func (s *Scanner) IsVariablesContainsSensitiveData(vars []*Variable) bool {
 }
 
 func (s *Scanner) IsVariableContainsSensitiveData(variable *Variable) (string, bool) {
-	for _, rule := range s.c.KeysRE {
+	for _, rule := range s.c.Keys {
 		if rule.MatchString(variable.Key) {
 			return rule.String(), true
 		}
 	}
-	for _, rule := range s.c.ValuesRE {
+	for _, rule := range s.c.Values {
 		if rule.MatchString(variable.Value) {
 			return rule.String(), true
 		}
 	}
-	for _, rule := range s.c.PairsRE {
+	for _, rule := range s.c.Pairs {
 		pair := fmt.Sprintf("%s=%s", variable.Key, variable.Value)
 		if rule.MatchString(pair) {
 			return rule.String(), true
