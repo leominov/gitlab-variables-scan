@@ -31,13 +31,9 @@ func NewScanner(c *Config) (*Scanner, error) {
 }
 
 func (s *Scanner) Scan() error {
-	groups := []*gitlab.Group{}
-	for _, groupID := range s.c.GroupIDs {
-		group, err := s.git.GetGroup(groupID)
-		if err != nil {
-			return err
-		}
-		groups = append(groups, group)
+	groups, err := s.fetchRootGroups()
+	if err != nil {
+		return err
 	}
 	subgroups, err := s.fetchGroups()
 	if err != nil {
@@ -62,6 +58,18 @@ func (s *Scanner) Scan() error {
 		return errors.New("Failed. Found sensitive data")
 	}
 	return nil
+}
+
+func (s *Scanner) fetchRootGroups() ([]*gitlab.Group, error) {
+	groups := []*gitlab.Group{}
+	for _, groupID := range s.c.GroupIDs {
+		group, err := s.git.GetGroup(groupID)
+		if err != nil {
+			return nil, err
+		}
+		groups = append(groups, group)
+	}
+	return groups, nil
 }
 
 func (s *Scanner) fetchGroups() ([]*gitlab.Group, error) {
