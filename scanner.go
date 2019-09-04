@@ -145,10 +145,10 @@ func (s *Scanner) IsVariablesContainsSensitiveData(vars []*Variable) bool {
 	for _, variable := range vars {
 		value := strings.Replace(variable.Value, "\n", "", -1)
 		match := false
-		for _, rule := range s.c.VariablesRE {
+		for _, rule := range s.c.KeysRE {
 			if rule.MatchString(variable.Key) {
 				match = true
-				log.Printf("  * %s=%s [by variable]", variable.Key, value)
+				log.Printf("  * %s=%s [by key]", variable.Key, value)
 				break
 			}
 		}

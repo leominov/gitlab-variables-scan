@@ -11,7 +11,7 @@ token: ABCD
 groupIDs:
   - 1
   - 2
-variables:
+keys:
   - PASSWORD
 values:
   - BEGIN PRIVATE KEY

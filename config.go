@@ -10,15 +10,15 @@ import (
 )
 
 type Config struct {
-	Endpoint     string           `yaml:"endpoint"`
-	Token        string           `yaml:"token"`
-	GroupIDs     []int            `yaml:"groupIDs"`
-	VariablesRaw []string         `yaml:"variables"`
-	VariablesRE  []*regexp.Regexp `yaml:"-"`
-	ValuesRaw    []string         `yaml:"values"`
-	ValuesRE     []*regexp.Regexp `yaml:"-"`
-	PairsRaw     []string         `yaml:"pairs"`
-	PairsRE      []*regexp.Regexp `yaml:"-"`
+	Endpoint  string           `yaml:"endpoint"`
+	Token     string           `yaml:"token"`
+	GroupIDs  []int            `yaml:"groupIDs"`
+	KeysRaw   []string         `yaml:"keys"`
+	KeysRE    []*regexp.Regexp `yaml:"-"`
+	ValuesRaw []string         `yaml:"values"`
+	ValuesRE  []*regexp.Regexp `yaml:"-"`
+	PairsRaw  []string         `yaml:"pairs"`
+	PairsRE   []*regexp.Regexp `yaml:"-"`
 }
 
 func LoadFromFile(filename string) (*Config, error) {
@@ -53,12 +53,12 @@ func (c *Config) fillFromEnv() error {
 }
 
 func (c *Config) parseRawData() error {
-	for _, variable := range c.VariablesRaw {
+	for _, variable := range c.KeysRaw {
 		re, err := regexp.Compile(variable)
 		if err != nil {
 			return fmt.Errorf("Failed to parse %s regexp", variable)
 		}
-		c.VariablesRE = append(c.VariablesRE, re)
+		c.KeysRE = append(c.KeysRE, re)
 	}
 	for _, value := range c.ValuesRaw {
 		re, err := regexp.Compile(value)
