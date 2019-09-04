@@ -75,8 +75,11 @@ func (s *Scanner) fetchGroups() ([]*gitlab.Group, error) {
 		groups = append(groups, grs...)
 	}
 	if s.c.Debug {
-		log.Println(strings.Join(groupNames, ", "))
-		log.Printf("Found %d group(s)", len(groups))
+		log.Printf(
+			"Found %d group(s): %s",
+			len(groups),
+			strings.Join(groupNames, ", "),
+		)
 	}
 	return groups, nil
 }
@@ -96,8 +99,11 @@ func (s *Scanner) fetchProjects() ([]*gitlab.Project, error) {
 		projects = append(projects, prs...)
 	}
 	if s.c.Debug {
-		log.Println(strings.Join(projectNames, ", "))
-		log.Printf("Found %d project(s)", len(projects))
+		log.Printf(
+			"Found %d project(s): %s",
+			len(projects),
+			strings.Join(projectNames, ", "),
+		)
 	}
 	return projects, nil
 }
