@@ -84,10 +84,9 @@ func (g *Git) GetProjects(groupID int) ([]*gitlab.Project, error) {
 
 func (g *Git) GetProjectVariables(projectID int) ([]*Variable, error) {
 	entries := []*Variable{}
+	options := &gitlab.ListVariablesOptions{}
 	err := g.withPagination(func(opts gitlab.ListOptions) (*gitlab.Response, error) {
-		options := &gitlab.ListVariablesOptions{
-			ListOptions: opts,
-		}
+		options.ListOptions = opts
 		fetchedEntries, r, err := g.cli.ProjectVariables.ListVariables(projectID, options, nil)
 		if err != nil {
 			return nil, err
@@ -105,10 +104,9 @@ func (g *Git) GetProjectVariables(projectID int) ([]*Variable, error) {
 
 func (g *Git) GetGroupVariables(groupID int) ([]*Variable, error) {
 	entries := []*Variable{}
+	options := &gitlab.ListVariablesOptions{}
 	err := g.withPagination(func(opts gitlab.ListOptions) (*gitlab.Response, error) {
-		options := &gitlab.ListVariablesOptions{
-			ListOptions: opts,
-		}
+		options.ListOptions = opts
 		fetchedEntries, r, err := g.cli.GroupVariables.ListVariables(groupID, options, nil)
 		if err != nil {
 			return nil, err
