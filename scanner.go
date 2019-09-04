@@ -42,7 +42,7 @@ func (s *Scanner) Scan() error {
 		return err
 	}
 	groups = append(groups, subgroups...)
-	err = s.checkGroupsVaribles(groups)
+	err = s.checkGroupsVariables(groups)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (s *Scanner) Scan() error {
 	if err != nil {
 		return err
 	}
-	err = s.checkProjectsVaribles(projects)
+	err = s.checkProjectsVariables(projects)
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func (s *Scanner) fetchProjects() ([]*gitlab.Project, error) {
 	return projects, nil
 }
 
-func (s *Scanner) checkProjectsVaribles(projects []*gitlab.Project) error {
+func (s *Scanner) checkProjectsVariables(projects []*gitlab.Project) error {
 	for _, project := range projects {
 		log.Printf("Checking %s project...", project.NameWithNamespace)
 		vars, err := s.git.GetProjectVariables(project.ID)
@@ -122,7 +122,7 @@ func (s *Scanner) checkProjectsVaribles(projects []*gitlab.Project) error {
 	return nil
 }
 
-func (s *Scanner) checkGroupsVaribles(groups []*gitlab.Group) error {
+func (s *Scanner) checkGroupsVariables(groups []*gitlab.Group) error {
 	for _, group := range groups {
 		log.Printf("Checking %s group...", group.FullName)
 		vars, err := s.git.GetGroupVariables(group.ID)
