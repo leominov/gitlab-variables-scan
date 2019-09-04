@@ -145,41 +145,30 @@ func (s *Scanner) IsVariablesContainsSensitiveData(vars []*Variable) bool {
 		if s.c.Insecure {
 			value = strings.Replace(variable.Value, "\n", "", -1)
 		}
-		match := false
-		for _, rule := range s.c.KeysRE {
-			if rule.MatchString(variable.Key) {
-				match = true
-				log.Printf("  * %s=%s [by key]", variable.Key, value)
-				break
-			}
-		}
-		if match {
+		if re, yes := s.IsVariableContainsSensitiveData(variable); yes {
+			log.Printf("  * %s=%s [%s]", variable.Key, value, re)
 			contains = true
-			continue
-		}
-		for _, rule := range s.c.ValuesRE {
-			if rule.MatchString(variable.Value) {
-				match = true
-				log.Printf("  * %s=%s [by value]", variable.Key, value)
-				break
-			}
-		}
-		if match {
-			contains = true
-			continue
-		}
-		for _, rule := range s.c.PairsRE {
-			pair := fmt.Sprintf("%s=%s", variable.Key, variable.Value)
-			if rule.MatchString(pair) {
-				match = true
-				log.Printf("  * %s=%s [by pair]", variable.Key, value)
-				break
-			}
-		}
-		if match {
-			contains = true
-			continue
 		}
 	}
 	return contains
+}
+
+func (s *Scanner) IsVariableContainsSensitiveData(variable *Variable) (string, bool) {
+	for _, rule := range s.c.KeysRE {
+		if rule.MatchString(variable.Key) {
+			return rule.String(), true
+		}
+	}
+	for _, rule := range s.c.ValuesRE {
+		if rule.MatchString(variable.Value) {
+			return rule.String(), true
+		}
+	}
+	for _, rule := range s.c.PairsRE {
+		pair := fmt.Sprintf("%s=%s", variable.Key, variable.Value)
+		if rule.MatchString(pair) {
+			return rule.String(), true
+		}
+	}
+	return "", false
 }
