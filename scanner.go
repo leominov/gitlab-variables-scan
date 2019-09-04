@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"strings"
 
@@ -8,9 +9,10 @@ import (
 )
 
 type Scanner struct {
-	debug bool
-	c     *Config
-	git   *Git
+	debug  bool
+	c      *Config
+	git    *Git
+	failed bool
 }
 
 func NewScanner(c *Config, debug bool) (*Scanner, error) {
@@ -26,18 +28,24 @@ func NewScanner(c *Config, debug bool) (*Scanner, error) {
 }
 
 func (s *Scanner) Scan() error {
-	err := s.checkRootGroupsVariables()
+	groups := []*gitlab.Group{}
+	for _, groupID := range s.c.GroupIDs {
+		group, err := s.git.GetGroup(groupID)
+		if err != nil {
+			return err
+		}
+		groups = append(groups, group)
+	}
+	subgroups, err := s.fetchGroups()
 	if err != nil {
 		return err
 	}
-	groups, err := s.fetchGroups()
-	if err != nil {
-		return err
-	}
+	groups = append(groups, subgroups...)
 	err = s.checkGroupsVaribles(groups)
 	if err != nil {
 		return err
 	}
+
 	projects, err := s.fetchProjects()
 	if err != nil {
 		return err
@@ -45,6 +53,10 @@ func (s *Scanner) Scan() error {
 	err = s.checkProjectsVaribles(projects)
 	if err != nil {
 		return err
+	}
+
+	if s.failed {
+		return errors.New("Failed. Found sensitive data")
 	}
 	return nil
 }
@@ -101,7 +113,10 @@ func (s *Scanner) checkProjectsVaribles(projects []*gitlab.Project) error {
 		if s.debug {
 			log.Printf("Found %d variable(s)", len(vars))
 		}
-		s.checkVariablesSensitiveData(vars)
+		isContains := s.IsVariablesContainsSensitiveData(vars)
+		if isContains {
+			s.failed = true
+		}
 	}
 	return nil
 }
@@ -116,27 +131,16 @@ func (s *Scanner) checkGroupsVaribles(groups []*gitlab.Group) error {
 		if s.debug {
 			log.Printf("Found %d variable(s)", len(vars))
 		}
-		s.checkVariablesSensitiveData(vars)
+		isContains := s.IsVariablesContainsSensitiveData(vars)
+		if isContains {
+			s.failed = true
+		}
 	}
 	return nil
 }
 
-func (s *Scanner) checkRootGroupsVariables() error {
-	for _, id := range s.c.GroupIDs {
-		log.Printf("Checking %d group...", id)
-		vars, err := s.git.GetGroupVariables(id)
-		if err != nil {
-			return err
-		}
-		if s.debug {
-			log.Printf("Found %d variable(s)", len(vars))
-		}
-		s.checkVariablesSensitiveData(vars)
-	}
-	return nil
-}
-
-func (s *Scanner) checkVariablesSensitiveData(vars []*Variable) {
+func (s *Scanner) IsVariablesContainsSensitiveData(vars []*Variable) bool {
+	contains := false
 	for _, variable := range vars {
 		value := strings.Replace(variable.Value, "\n", "", -1)
 		match := false
@@ -148,6 +152,7 @@ func (s *Scanner) checkVariablesSensitiveData(vars []*Variable) {
 			}
 		}
 		if match {
+			contains = true
 			continue
 		}
 		for _, rule := range s.c.ValuesRE {
@@ -157,5 +162,10 @@ func (s *Scanner) checkVariablesSensitiveData(vars []*Variable) {
 				break
 			}
 		}
+		if match {
+			contains = true
+			continue
+		}
 	}
+	return contains
 }

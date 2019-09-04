@@ -167,3 +167,11 @@ func (g *Git) GetGroupVariables(groupID int) ([]*Variable, error) {
 	}
 	return entries, nil
 }
+
+func (g *Git) GetGroup(groupID int) (*gitlab.Group, error) {
+	group, _, err := g.cli.Groups.GetGroup(groupID)
+	if err != nil {
+		return nil, err
+	}
+	return group, nil
+}

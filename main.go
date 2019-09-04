@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-
-	"github.com/sirupsen/logrus"
+	"log"
+	"os"
 )
 
 var (
@@ -11,18 +11,27 @@ var (
 	debug      = flag.Bool("debug", false, "Enable debug logs.")
 )
 
-func main() {
+func realMain() error {
 	flag.Parse()
 	config, err := LoadFromFile(*configFile)
 	if err != nil {
-		logrus.Fatal(err)
+		return err
 	}
 	scanner, err := NewScanner(config, *debug)
 	if err != nil {
-		logrus.Fatal(err)
+		return err
 	}
 	err = scanner.Scan()
 	if err != nil {
-		logrus.Fatal(err)
+		return err
+	}
+	return nil
+}
+
+func main() {
+	err := realMain()
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
 	}
 }
