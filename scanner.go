@@ -9,6 +9,10 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
+const (
+	secureValueMask = "***"
+)
+
 type Scanner struct {
 	c      *Config
 	git    *Git
@@ -147,7 +151,7 @@ func (s *Scanner) checkGroupsVariables(groups []*gitlab.Group) error {
 func (s *Scanner) IsVariablesContainsSensitiveData(vars []*Variable) bool {
 	contains := false
 	for _, variable := range vars {
-		value := "***"
+		value := secureValueMask
 		if s.c.Insecure {
 			value = strings.Replace(variable.Value, "\n", "", -1)
 		}
