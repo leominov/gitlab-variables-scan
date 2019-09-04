@@ -9,6 +9,7 @@ import (
 var (
 	configFile = flag.String("config", "config.yaml", "Path to configuration file.")
 	debug      = flag.Bool("debug", false, "Enable debug logs.")
+	insecure   = flag.Bool("k", false, "Prints values of matched variables.")
 )
 
 func realMain() error {
@@ -19,6 +20,9 @@ func realMain() error {
 	}
 	if *debug {
 		config.Debug = true
+	}
+	if *insecure {
+		config.Insecure = true
 	}
 	scanner, err := NewScanner(config)
 	if err != nil {

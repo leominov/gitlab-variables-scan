@@ -141,7 +141,10 @@ func (s *Scanner) checkGroupsVariables(groups []*gitlab.Group) error {
 func (s *Scanner) IsVariablesContainsSensitiveData(vars []*Variable) bool {
 	contains := false
 	for _, variable := range vars {
-		value := strings.Replace(variable.Value, "\n", "", -1)
+		value := "***"
+		if s.c.Insecure {
+			value = strings.Replace(variable.Value, "\n", "", -1)
+		}
 		match := false
 		for _, rule := range s.c.KeysRE {
 			if rule.MatchString(variable.Key) {

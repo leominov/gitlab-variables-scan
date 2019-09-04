@@ -10,6 +10,7 @@ import (
 )
 
 type Config struct {
+	Insecure  bool             `yaml:"-"`
 	Debug     bool             `yaml:"debug"`
 	Endpoint  string           `yaml:"endpoint"`
 	Token     string           `yaml:"token"`
