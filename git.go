@@ -45,15 +45,12 @@ func (g *Git) GetSubGroups(groupID int) ([]*gitlab.Group, error) {
 }
 
 func (g *Git) getSubGroups(groupID int) ([]*gitlab.Group, error) {
-	page := 1
 	entries := []*gitlab.Group{}
-	for {
-		options := &gitlab.ListSubgroupsOptions{
-			ListOptions: gitlab.ListOptions{
-				Page: page,
-			},
-			AllAvailable: gitlab.Bool(true),
-		}
+	options := &gitlab.ListSubgroupsOptions{
+		AllAvailable: gitlab.Bool(true),
+	}
+	err := g.withPagination(func(opts gitlab.ListOptions) (*gitlab.Response, error) {
+		options.ListOptions = opts
 		fetchedEntries, r, err := g.cli.Groups.ListSubgroups(groupID, options, nil)
 		if err != nil {
 			return nil, err
@@ -61,29 +58,18 @@ func (g *Git) getSubGroups(groupID int) ([]*gitlab.Group, error) {
 		for _, entry := range fetchedEntries {
 			entries = append(entries, entry)
 		}
-		nextPageRaw := r.Header.Get("X-Next-Page")
-		if len(nextPageRaw) == 0 {
-			break
-		}
-		nextPage, err := strconv.Atoi(nextPageRaw)
-		if err != nil {
-			break
-		}
-		page = nextPage
-	}
-	return entries, nil
+		return r, nil
+	})
+	return entries, err
 }
 
 func (g *Git) GetProjects(groupID int) ([]*gitlab.Project, error) {
-	page := 1
 	entries := []*gitlab.Project{}
-	for {
-		options := &gitlab.ListGroupProjectsOptions{
-			ListOptions: gitlab.ListOptions{
-				Page: page,
-			},
-			IncludeSubgroups: gitlab.Bool(true),
-		}
+	options := &gitlab.ListGroupProjectsOptions{
+		IncludeSubgroups: gitlab.Bool(true),
+	}
+	err := g.withPagination(func(opts gitlab.ListOptions) (*gitlab.Response, error) {
+		options.ListOptions = opts
 		fetchedEntries, r, err := g.cli.Groups.ListGroupProjects(groupID, options, nil)
 		if err != nil {
 			return nil, err
@@ -91,27 +77,16 @@ func (g *Git) GetProjects(groupID int) ([]*gitlab.Project, error) {
 		for _, entry := range fetchedEntries {
 			entries = append(entries, entry)
 		}
-		nextPageRaw := r.Header.Get("X-Next-Page")
-		if len(nextPageRaw) == 0 {
-			break
-		}
-		nextPage, err := strconv.Atoi(nextPageRaw)
-		if err != nil {
-			break
-		}
-		page = nextPage
-	}
-	return entries, nil
+		return r, nil
+	})
+	return entries, err
 }
 
 func (g *Git) GetProjectVariables(projectID int) ([]*Variable, error) {
-	page := 1
 	entries := []*Variable{}
-	for {
+	err := g.withPagination(func(opts gitlab.ListOptions) (*gitlab.Response, error) {
 		options := &gitlab.ListVariablesOptions{
-			ListOptions: gitlab.ListOptions{
-				Page: page,
-			},
+			ListOptions: opts,
 		}
 		fetchedEntries, r, err := g.cli.ProjectVariables.ListVariables(projectID, options, nil)
 		if err != nil {
@@ -123,27 +98,16 @@ func (g *Git) GetProjectVariables(projectID int) ([]*Variable, error) {
 				Value: entry.Value,
 			})
 		}
-		nextPageRaw := r.Header.Get("X-Next-Page")
-		if len(nextPageRaw) == 0 {
-			break
-		}
-		nextPage, err := strconv.Atoi(nextPageRaw)
-		if err != nil {
-			break
-		}
-		page = nextPage
-	}
-	return entries, nil
+		return r, nil
+	})
+	return entries, err
 }
 
 func (g *Git) GetGroupVariables(groupID int) ([]*Variable, error) {
-	page := 1
 	entries := []*Variable{}
-	for {
+	err := g.withPagination(func(opts gitlab.ListOptions) (*gitlab.Response, error) {
 		options := &gitlab.ListVariablesOptions{
-			ListOptions: gitlab.ListOptions{
-				Page: page,
-			},
+			ListOptions: opts,
 		}
 		fetchedEntries, r, err := g.cli.GroupVariables.ListVariables(groupID, options, nil)
 		if err != nil {
@@ -155,6 +119,21 @@ func (g *Git) GetGroupVariables(groupID int) ([]*Variable, error) {
 				Value: entry.Value,
 			})
 		}
+		return r, nil
+	})
+	return entries, err
+}
+
+func (g *Git) withPagination(fetch func(opts gitlab.ListOptions) (*gitlab.Response, error)) error {
+	page := 1
+	for {
+		opts := gitlab.ListOptions{
+			Page: page,
+		}
+		r, err := fetch(opts)
+		if err != nil {
+			return err
+		}
 		nextPageRaw := r.Header.Get("X-Next-Page")
 		if len(nextPageRaw) == 0 {
 			break
@@ -165,7 +144,7 @@ func (g *Git) GetGroupVariables(groupID int) ([]*Variable, error) {
 		}
 		page = nextPage
 	}
-	return entries, nil
+	return nil
 }
 
 func (g *Git) GetGroup(groupID int) (*gitlab.Group, error) {
