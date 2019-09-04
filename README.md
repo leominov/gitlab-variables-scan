@@ -12,7 +12,6 @@ groupIDs:
   - 1
   - 2
 keys:
-  # Common-used variable names
   - KEY$
   - TOKEN$
   - SECRET$
