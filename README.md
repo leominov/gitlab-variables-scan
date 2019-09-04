@@ -16,5 +16,5 @@ variables:
 values:
   - BEGIN PRIVATE KEY
 pairs:
-  - FOO=BAR
+  - LOGIN=guest
 ```
