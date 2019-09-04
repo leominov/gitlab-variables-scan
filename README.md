@@ -15,4 +15,6 @@ variables:
   - PASSWORD
 values:
   - BEGIN PRIVATE KEY
+pairs:
+  - FOO=BAR
 ```

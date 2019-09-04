@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 
@@ -147,7 +148,7 @@ func (s *Scanner) IsVariablesContainsSensitiveData(vars []*Variable) bool {
 		for _, rule := range s.c.VariablesRE {
 			if rule.MatchString(variable.Key) {
 				match = true
-				log.Printf("  * %s=%s [by name]", variable.Key, value)
+				log.Printf("  * %s=%s [by variable]", variable.Key, value)
 				break
 			}
 		}
@@ -159,6 +160,18 @@ func (s *Scanner) IsVariablesContainsSensitiveData(vars []*Variable) bool {
 			if rule.MatchString(variable.Value) {
 				match = true
 				log.Printf("  * %s=%s [by value]", variable.Key, value)
+				break
+			}
+		}
+		if match {
+			contains = true
+			continue
+		}
+		for _, rule := range s.c.PairsRE {
+			pair := fmt.Sprintf("%s=%s", variable.Key, variable.Value)
+			if rule.MatchString(pair) {
+				match = true
+				log.Printf("  * %s=%s [by pair]", variable.Key, value)
 				break
 			}
 		}
