@@ -37,4 +37,5 @@ func main() {
 		log.Println(err)
 		os.Exit(1)
 	}
+	log.Println("Done")
 }
