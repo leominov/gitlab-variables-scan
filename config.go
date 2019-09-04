@@ -60,21 +60,21 @@ func (c *Config) parseRawData() error {
 		if err != nil {
 			return fmt.Errorf("Failed to parse %s regexp", variable)
 		}
-		c.KeysRE = append(c.KeysRE, re)
+		c.Keys = append(c.Keys, re)
 	}
 	for _, value := range c.ValuesRaw {
 		re, err := regexp.Compile(value)
 		if err != nil {
 			return fmt.Errorf("Failed to parse %s regexp", value)
 		}
-		c.ValuesRE = append(c.ValuesRE, re)
+		c.Values = append(c.Values, re)
 	}
 	for _, pair := range c.PairsRaw {
 		re, err := regexp.Compile(pair)
 		if err != nil {
 			return fmt.Errorf("Failed to parse %s regexp", pair)
 		}
-		c.PairsRE = append(c.PairsRE, re)
+		c.Pairs = append(c.Pairs, re)
 	}
 	return nil
 }
