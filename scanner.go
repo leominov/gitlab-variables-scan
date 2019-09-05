@@ -130,10 +130,7 @@ func (s *Scanner) checkProjectsVariables(projects []*gitlab.Project) error {
 		if s.c.Debug {
 			log.Printf("Found %d variable(s)", len(vars))
 		}
-		if isMatch := s.IsVariablesMatchToFilters(vars, s.c.Exclude, false); isMatch {
-			continue
-		}
-		if isMatch := s.IsVariablesMatchToFilters(vars, s.c.Include, true); isMatch {
+		if isMatch := s.IsVariablesMatchToFilters(vars); isMatch {
 			s.failed = true
 		}
 	}
@@ -150,27 +147,25 @@ func (s *Scanner) checkGroupsVariables(groups []*gitlab.Group) error {
 		if s.c.Debug {
 			log.Printf("Found %d variable(s)", len(vars))
 		}
-		if isMatch := s.IsVariablesMatchToFilters(vars, s.c.Exclude, false); isMatch {
-			continue
-		}
-		if isMatch := s.IsVariablesMatchToFilters(vars, s.c.Include, true); isMatch {
+		if isMatch := s.IsVariablesMatchToFilters(vars); isMatch {
 			s.failed = true
 		}
 	}
 	return nil
 }
 
-func (s *Scanner) IsVariablesMatchToFilters(vars []*Variable, f Filters, printsInfo bool) bool {
+func (s *Scanner) IsVariablesMatchToFilters(vars []*Variable) bool {
 	contains := false
 	for _, variable := range vars {
 		value := secureValueMask
 		if s.c.Insecure {
 			value = strings.Replace(variable.Value, "\n", "", -1)
 		}
-		if re, yes := s.IsVariableMatchToFilters(variable, f); yes {
-			if printsInfo {
-				log.Printf("  * %s=%s [%s]", variable.Key, value, re)
-			}
+		if _, yes := s.IsVariableMatchToFilters(variable, s.c.Exclude); yes {
+			continue
+		}
+		if re, yes := s.IsVariableMatchToFilters(variable, s.c.Include); yes {
+			log.Printf("  * %s=%s [%s]", variable.Key, value, re)
 			contains = true
 		}
 	}
