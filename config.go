@@ -10,11 +10,17 @@ import (
 )
 
 type Config struct {
-	Insecure  bool             `yaml:"-"`
-	Debug     bool             `yaml:"debug"`
-	Endpoint  string           `yaml:"endpoint"`
-	Token     string           `yaml:"token"`
-	GroupIDs  []int            `yaml:"groupIDs"`
+	Insecure bool     `yaml:"-"`
+	Debug    bool     `yaml:"debug"`
+	Endpoint string   `yaml:"endpoint"`
+	Token    string   `yaml:"token"`
+	GroupIDs []int    `yaml:"groupIDs"`
+	KeysRaw  []string `yaml:"keys"`
+	Include  Filters  `yaml:"include"`
+	Exclude  Filters  `yaml:"exclude"`
+}
+
+type Filters struct {
 	KeysRaw   []string         `yaml:"keys"`
 	Keys      []*regexp.Regexp `yaml:"-"`
 	ValuesRaw []string         `yaml:"values"`
@@ -55,26 +61,36 @@ func (c *Config) fillFromEnv() error {
 }
 
 func (c *Config) parseRawData() error {
-	for _, variable := range c.KeysRaw {
+	if err := c.Exclude.Parse(); err != nil {
+		return err
+	}
+	if err := c.Include.Parse(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (f *Filters) Parse() error {
+	for _, variable := range f.KeysRaw {
 		re, err := regexp.Compile(variable)
 		if err != nil {
 			return fmt.Errorf("Failed to parse %s regexp", variable)
 		}
-		c.Keys = append(c.Keys, re)
+		f.Keys = append(f.Keys, re)
 	}
-	for _, value := range c.ValuesRaw {
+	for _, value := range f.ValuesRaw {
 		re, err := regexp.Compile(value)
 		if err != nil {
 			return fmt.Errorf("Failed to parse %s regexp", value)
 		}
-		c.Values = append(c.Values, re)
+		f.Values = append(f.Values, re)
 	}
-	for _, pair := range c.PairsRaw {
+	for _, pair := range f.PairsRaw {
 		re, err := regexp.Compile(pair)
 		if err != nil {
 			return fmt.Errorf("Failed to parse %s regexp", pair)
 		}
-		c.Pairs = append(c.Pairs, re)
+		f.Pairs = append(f.Pairs, re)
 	}
 	return nil
 }

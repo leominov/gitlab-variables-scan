@@ -11,14 +11,18 @@ token: ABCD
 groupIDs:
   - 1
   - 2
-keys:
-  - KEY$
-  - TOKEN$
-  - SECRET$
-  - PASSWORD$
-values:
-  - BEGIN PRIVATE KEY
-  - ^s\.(.*){24}$
-pairs:
-  - LOGIN=guest
+exclude:
+  keys:
+    - PUBLIC_TOKEN
+include:
+  keys:
+    - KEY$
+    - TOKEN$
+    - SECRET$
+    - PASSWORD$
+  values:
+    - BEGIN PRIVATE KEY
+    - ^s\.(.*){24}$
+  pairs:
+    - LOGIN=guest
 ```

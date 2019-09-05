@@ -130,8 +130,10 @@ func (s *Scanner) checkProjectsVariables(projects []*gitlab.Project) error {
 		if s.c.Debug {
 			log.Printf("Found %d variable(s)", len(vars))
 		}
-		isContains := s.IsVariablesContainsSensitiveData(vars)
-		if isContains {
+		if isMatch := s.IsVariablesMatchToFilters(vars, s.c.Exclude, false); isMatch {
+			continue
+		}
+		if isMatch := s.IsVariablesMatchToFilters(vars, s.c.Include, true); isMatch {
 			s.failed = true
 		}
 	}
@@ -148,41 +150,45 @@ func (s *Scanner) checkGroupsVariables(groups []*gitlab.Group) error {
 		if s.c.Debug {
 			log.Printf("Found %d variable(s)", len(vars))
 		}
-		isContains := s.IsVariablesContainsSensitiveData(vars)
-		if isContains {
+		if isMatch := s.IsVariablesMatchToFilters(vars, s.c.Exclude, false); isMatch {
+			continue
+		}
+		if isMatch := s.IsVariablesMatchToFilters(vars, s.c.Include, true); isMatch {
 			s.failed = true
 		}
 	}
 	return nil
 }
 
-func (s *Scanner) IsVariablesContainsSensitiveData(vars []*Variable) bool {
+func (s *Scanner) IsVariablesMatchToFilters(vars []*Variable, f Filters, printsInfo bool) bool {
 	contains := false
 	for _, variable := range vars {
 		value := secureValueMask
 		if s.c.Insecure {
 			value = strings.Replace(variable.Value, "\n", "", -1)
 		}
-		if re, yes := s.IsVariableContainsSensitiveData(variable); yes {
-			log.Printf("  * %s=%s [%s]", variable.Key, value, re)
+		if re, yes := s.IsVariableMatchToFilters(variable, f); yes {
+			if printsInfo {
+				log.Printf("  * %s=%s [%s]", variable.Key, value, re)
+			}
 			contains = true
 		}
 	}
 	return contains
 }
 
-func (s *Scanner) IsVariableContainsSensitiveData(variable *Variable) (string, bool) {
-	for _, rule := range s.c.Keys {
+func (s *Scanner) IsVariableMatchToFilters(variable *Variable, f Filters) (string, bool) {
+	for _, rule := range f.Keys {
 		if rule.MatchString(variable.Key) {
 			return rule.String(), true
 		}
 	}
-	for _, rule := range s.c.Values {
+	for _, rule := range f.Values {
 		if rule.MatchString(variable.Value) {
 			return rule.String(), true
 		}
 	}
-	for _, rule := range s.c.Pairs {
+	for _, rule := range f.Pairs {
 		pair := fmt.Sprintf("%s=%s", variable.Key, variable.Value)
 		if rule.MatchString(pair) {
 			return rule.String(), true
