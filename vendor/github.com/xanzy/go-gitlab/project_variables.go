@@ -43,9 +43,7 @@ type ProjectVariable struct {
 	EnvironmentScope string            `json:"environment_scope"`
 }
 
-type ListVariablesOptions struct {
-	ListOptions
-}
+type ListVariablesOptions ListOptions
 
 func (v ProjectVariable) String() string {
 	return Stringify(v)
