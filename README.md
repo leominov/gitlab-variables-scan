@@ -25,4 +25,7 @@ include:
     - ^s\.(.*){24}$
   pairs:
     - LOGIN=guest
+exclude:
+  pairs:
+    - TOKEN=guest
 ```
