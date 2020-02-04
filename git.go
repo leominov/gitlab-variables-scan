@@ -55,9 +55,7 @@ func (g *Git) getSubGroups(groupID int) ([]*gitlab.Group, error) {
 		if err != nil {
 			return nil, err
 		}
-		for _, entry := range fetchedEntries {
-			entries = append(entries, entry)
-		}
+		entries = append(entries, fetchedEntries...)
 		return r, nil
 	})
 	return entries, err
@@ -74,9 +72,7 @@ func (g *Git) GetProjects(groupID int) ([]*gitlab.Project, error) {
 		if err != nil {
 			return nil, err
 		}
-		for _, entry := range fetchedEntries {
-			entries = append(entries, entry)
-		}
+		entries = append(entries, fetchedEntries...)
 		return r, nil
 	})
 	return entries, err

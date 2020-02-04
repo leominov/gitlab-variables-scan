@@ -12,7 +12,9 @@ func TestIsVariableContainsSensitiveData(t *testing.T) {
 			},
 		},
 	}
-	s.c.parseRawData()
+	if err := s.c.parseRawData(); err != nil {
+		t.Error(err)
+	}
 	tests := []struct {
 		v     *Variable
 		match bool
