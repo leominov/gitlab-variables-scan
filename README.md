@@ -26,3 +26,14 @@ include:
   pairs:
     - LOGIN=guest
 ```
+
+## Usage
+
+```
+Usage of ./gitlab-variables-scan:
+  -config string
+    	Path to configuration file. (default "config.yaml")
+  -debug
+    	Enable debug logs.
+  -k	Prints values of matched variables.
+```
