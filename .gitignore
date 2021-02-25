@@ -1,3 +1,7 @@
+# IDE
+.vscode
+.idea
+
 /config.*
 /coverage.txt
 /gitlab-variables-scan

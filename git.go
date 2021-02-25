@@ -1,8 +1,6 @@
 package main
 
 import (
-	"strconv"
-
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -16,8 +14,7 @@ type Variable struct {
 }
 
 func NewGit(endpoint, token string) (*Git, error) {
-	cli := gitlab.NewClient(nil, token)
-	err := cli.SetBaseURL(endpoint)
+	cli,err := gitlab.NewClient(token, gitlab.WithBaseURL(endpoint))
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +78,7 @@ func (g *Git) GetProjects(groupID int) ([]*gitlab.Project, error) {
 func (g *Git) GetProjectVariables(projectID int) ([]*Variable, error) {
 	entries := []*Variable{}
 	err := g.withPagination(func(opts gitlab.ListOptions) (*gitlab.Response, error) {
-		options := gitlab.ListVariablesOptions(opts)
+		options := gitlab.ListProjectVariablesOptions(opts)
 		fetchedEntries, r, err := g.cli.ProjectVariables.ListVariables(projectID, &options, nil)
 		if err != nil {
 			return nil, err
@@ -100,7 +97,7 @@ func (g *Git) GetProjectVariables(projectID int) ([]*Variable, error) {
 func (g *Git) GetGroupVariables(groupID int) ([]*Variable, error) {
 	entries := []*Variable{}
 	err := g.withPagination(func(opts gitlab.ListOptions) (*gitlab.Response, error) {
-		options := gitlab.ListVariablesOptions(opts)
+		options := gitlab.ListGroupVariablesOptions(opts)
 		fetchedEntries, r, err := g.cli.GroupVariables.ListVariables(groupID, &options, nil)
 		if err != nil {
 			return nil, err
@@ -126,23 +123,15 @@ func (g *Git) withPagination(fetch func(opts gitlab.ListOptions) (*gitlab.Respon
 		if err != nil {
 			return err
 		}
-		nextPageRaw := r.Header.Get("X-Next-Page")
-		if len(nextPageRaw) == 0 {
+		if r.NextPage == 0 {
 			break
 		}
-		nextPage, err := strconv.Atoi(nextPageRaw)
-		if err != nil {
-			break
-		}
-		page = nextPage
+		page = r.NextPage
 	}
 	return nil
 }
 
 func (g *Git) GetGroup(groupID int) (*gitlab.Group, error) {
 	group, _, err := g.cli.Groups.GetGroup(groupID)
-	if err != nil {
-		return nil, err
-	}
-	return group, nil
+	return group, err
 }
